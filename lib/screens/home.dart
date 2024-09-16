@@ -18,18 +18,25 @@ class _TechntoysHomeScreenState extends State<TechntoysHomeScreen> {
         index: _currentIndex,
         children: const [
           // home
-          WebViewScreen(url: "https://techntoys.com/"),
+          WebViewScreen(url: "https://techntoys.com/", label: "Home"),
 
           // categories
           WebViewScreen(
-              url: "https://techntoys.com/en/techn-toys-category-listing.html"),
+            url: "https://techntoys.com/en/techn-toys-category-listing.html",
+            label: "Categories",
+          ),
 
           // cart
-          WebViewScreen(url: "https://techntoys.com/en/checkout/cart/"),
+          WebViewScreen(
+            url: "https://techntoys.com/en/checkout/cart/",
+            label: "Cart",
+          ),
 
           // profile
           WebViewScreen(
-              url: "https://techntoys.com/en/customer/account/create/"),
+            url: "https://techntoys.com/en/customer/account/create/",
+            label: "Profile",
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(

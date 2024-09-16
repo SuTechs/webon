@@ -3,8 +3,13 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewScreen extends StatefulWidget {
   final String url;
+  final String label;
 
-  const WebViewScreen({super.key, required this.url});
+  const WebViewScreen({
+    super.key,
+    required this.url,
+    required this.label,
+  });
 
   @override
   State<WebViewScreen> createState() => _WebViewScreenState();
@@ -12,7 +17,8 @@ class WebViewScreen extends StatefulWidget {
 
 class _WebViewScreenState extends State<WebViewScreen> {
   late WebViewController _controller;
-  bool _isLoading = true;
+  double _loadingProgress = 0;
+  final GlobalKey _webViewKey = GlobalKey();
 
   @override
   void initState() {
@@ -23,17 +29,26 @@ class _WebViewScreenState extends State<WebViewScreen> {
         NavigationDelegate(
           onPageStarted: (String url) {
             setState(() {
-              _isLoading = true;
+              _loadingProgress = 0;
+            });
+          },
+          onProgress: (int progress) {
+            setState(() {
+              _loadingProgress = progress / 100;
             });
           },
           onPageFinished: (String url) {
             setState(() {
-              _isLoading = false;
+              _loadingProgress = 1;
             });
           },
         ),
       )
       ..loadRequest(Uri.parse(widget.url));
+  }
+
+  Future<void> _refreshWebView() async {
+    _controller.reload();
   }
 
   @override
@@ -53,27 +68,31 @@ class _WebViewScreenState extends State<WebViewScreen> {
                 },
               );
             }
-
             return const SizedBox.shrink();
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              _controller.reload();
-            },
-          ),
-        ],
+        title: Text(widget.label),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(2.0),
+          child: _loadingProgress < 1.0
+              ? LinearProgressIndicator(
+                  value: _loadingProgress,
+                  backgroundColor: Colors.grey[200],
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Theme.of(context).primaryColor,
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
       ),
-      body: Stack(
-        children: [
-          WebViewWidget(controller: _controller),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _refreshWebView,
+          child: WebViewWidget(
+            key: _webViewKey,
+            controller: _controller,
+          ),
+        ),
       ),
     );
   }
